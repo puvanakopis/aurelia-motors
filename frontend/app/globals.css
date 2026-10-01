@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #F9F8F6;
+    --foreground: #111215;
+    
+    --primary: #111215;
+    --primary-foreground: #F9F8F6;
+    
+    --secondary: #EFECE6;
+    --secondary-foreground: #111215;
+    
+    --muted: #71717A;
+    --muted-foreground: #52525B;
+    
+    --accent: #EAE5DD;
+    --accent-foreground: #111215;
+    
+    --card: #FFFFFF;
+    --card-foreground: #111215;
+    
+    --border: #E5E2DC;
+    --input: #E5E2DC;
+    --ring: #111215;
+  }
+
+  .dark {
+    --background: #0D0E10;
+    --foreground: #F4F4F5;
+    
+    --primary: #F4F4F5;
+    --primary-foreground: #0D0E10;
+    
+    --secondary: #1F2024;
+    --secondary-foreground: #F4F4F5;
+    
+    --muted: #71717A;
+    --muted-foreground: #A1A1AA;
+    
+    --accent: #27272A;
+    --accent-foreground: #FFFFFF;
+    
+    --card: #141519;
+    --card-foreground: #F4F4F5;
+    
+    --border: #27272A;
+    --input: #27272A;
+    --ring: #F4F4F5;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-background text-foreground antialiased font-sans selection:bg-stone-800 selection:text-stone-100;
+  }
+}
+
+/* Luxury Architectural Custom Utilities */
+.hairline-b {
+  border-bottom: 1px solid var(--border);
+}
+
+.hairline-t {
+  border-top: 1px solid var(--border);
+}
+
+.hairline-r {
+  border-right: 1px solid var(--border);
+}
+
+.hairline-l {
+  border-left: 1px solid var(--border);
+}
+
+.editorial-title {
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  font-weight: 600;
+}
+
+.sub-header-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: #78756F;
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(120, 117, 111, 0.25);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 117, 111, 0.45);
+}
