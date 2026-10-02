@@ -39,7 +39,7 @@ export function VehicleQuickViewModal({
     >
       <div className="space-y-6">
         {/* Main Image */}
-        <div className="relative aspect-[16/10] w-full overflow-hidden bg-stone-100 dark:bg-stone-900">
+        <div className="relative aspect-[16/10] w-full overflow-hidden bg-stone-100 dark:bg-stone-900 rounded-2xl">
           <Image
             src={primaryImage}
             alt={vehicle.name}
@@ -70,7 +70,7 @@ export function VehicleQuickViewModal({
         </p>
 
         {/* Key Specs Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 rounded-2xl">
           <div>
             <span className="text-[10px] uppercase tracking-tracked text-stone-400 block">Fuel</span>
             <span className="text-xs font-semibold text-foreground">{vehicle.fuelType}</span>
@@ -110,7 +110,7 @@ export function VehicleQuickViewModal({
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
           <Button
             variant="champagne"
-            className="flex-1"
+            className="flex-1 rounded-full"
             onClick={() => {
               onClose();
               onBookTestDrive(vehicle.id);
@@ -120,7 +120,7 @@ export function VehicleQuickViewModal({
           </Button>
 
           <Link href={`/vehicles/${vehicle.slug}`} className="flex-1">
-            <Button variant="primary" className="w-full flex items-center justify-center gap-2">
+            <Button variant="primary" className="w-full flex items-center justify-center gap-2 rounded-full">
               <span>FULL VEHICLE DOSSIER</span>
               <ArrowUpRight className="h-4 w-4" />
             </Button>

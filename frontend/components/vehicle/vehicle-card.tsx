@@ -3,108 +3,110 @@
 import * as React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowUpRight } from 'lucide-react';
+import { Users, Gauge, Briefcase, Fuel } from 'lucide-react';
 import { Vehicle } from '@aurelia/types';
 import { formatCurrency, formatMileage, cn } from '@/lib/utils';
 
 interface VehicleCardProps {
   vehicle: Vehicle;
-  isFavorite?: boolean;
-  onToggleFavorite?: (id: string) => void;
   onQuickView?: (vehicle: Vehicle) => void;
   className?: string;
 }
 
 export function VehicleCard({
   vehicle,
-  isFavorite = false,
-  onToggleFavorite,
   onQuickView,
   className,
 }: VehicleCardProps) {
   const primaryImage =
     vehicle.images?.find((img) => img.isPrimary)?.url ||
     vehicle.images?.[0]?.url ||
-    '/images/hero/hero-main.jpg';
+    '/images/hero-1.png';
 
-  const brandName = vehicle.brand?.name || 'AURELIA';
   const transmissionLabel =
     vehicle.transmission === 'AUTOMATIC'
-      ? 'Auto'
+      ? 'Automatic'
       : vehicle.transmission === 'MANUAL'
       ? 'Manual'
       : vehicle.transmission;
 
+  // Approximate seating and luggage based on body type / category
+  const isSuv = vehicle.category?.slug === 'suv' || vehicle.name.toLowerCase().includes('x5') || vehicle.name.toLowerCase().includes('gle') || vehicle.name.toLowerCase().includes('rover');
+  const seats = isSuv ? 7 : (vehicle.category?.slug === 'sports' ? 2 : 5);
+  const luggageBags = isSuv ? '4 bags' : (vehicle.category?.slug === 'sports' ? '1 bag' : '2 bags');
+
   return (
     <div
       className={cn(
-        'group flex flex-col bg-transparent pb-8 transition-all duration-300',
+        'group bg-[#F4F4F6] rounded-2xl sm:rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:bg-[#EFEFF2]',
         className
       )}
     >
-      {/* Vehicle Image Container */}
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-stone-100 dark:bg-stone-900 mb-5">
-        <Image
-          src={primaryImage}
-          alt={vehicle.name}
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-        />
+      {/* Top: Floating Vehicle Image */}
+      <Link href={`/vehicles/${vehicle.slug}`} className="block mb-6 overflow-hidden">
+        <div className="relative aspect-[16/10] w-full flex items-center justify-center">
+          <Image
+            src={primaryImage}
+            alt={vehicle.name}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-contain transition-transform duration-500 ease-out group-hover:scale-105"
+          />
+        </div>
+      </Link>
 
-        {/* Quick Spec Badge */}
-        {vehicle.discountPrice && (
-          <span className="absolute bottom-3 left-3 bg-black/80 backdrop-blur-sm text-white text-[10px] font-semibold tracking-tracked uppercase px-2 py-1">
-            Special Offer
+      {/* Middle: Title and Price Row */}
+      <div className="flex items-start justify-between gap-4 mb-6">
+        <div>
+          <h3 className="text-base sm:text-lg font-bold text-gray-900 tracking-tight leading-snug">
+            <Link href={`/vehicles/${vehicle.slug}`} className="hover:text-black">
+              {vehicle.name}
+            </Link>
+          </h3>
+          <p className="text-xs text-stone-500 mt-0.5">
+            {vehicle.brand?.name || 'Aurelia'} · {vehicle.year}
+          </p>
+        </div>
+
+        <div className="text-right shrink-0">
+          <div className="text-base sm:text-lg font-extrabold text-gray-900">
+            {formatCurrency(vehicle.price)}
+          </div>
+          <span className="text-[11px] text-stone-500 font-normal">
+            /Allocation
           </span>
-        )}
+        </div>
       </div>
 
-      {/* Metadata & Title Header */}
-      <div className="flex justify-between items-baseline mb-1">
-        <span className="text-[11px] uppercase tracking-tracked text-stone-500 font-medium">
-          {brandName} · {vehicle.year}
-        </span>
-        <span className="text-sm font-semibold tracking-tight text-foreground">
-          {formatCurrency(vehicle.price)}
-        </span>
+      {/* Bottom: 3-column Spec Icons Row */}
+      <div className="pt-4 border-t border-[#E5E5E8] grid grid-cols-3 gap-2 text-stone-700">
+        {/* Seat Column */}
+        <div className="flex items-center gap-2">
+          <Users className="h-4 w-4 text-stone-700 shrink-0" />
+          <div className="text-[11px] leading-tight">
+            <span className="text-[10px] text-stone-400 block font-normal">Seat</span>
+            <span className="font-semibold text-gray-900">{seats}</span>
+          </div>
+        </div>
+
+        {/* Gearbox Column */}
+        <div className="flex items-center gap-2">
+          <Gauge className="h-4 w-4 text-stone-700 shrink-0" />
+          <div className="text-[11px] leading-tight">
+            <span className="text-[10px] text-stone-400 block font-normal">Gearbox</span>
+            <span className="font-semibold text-gray-900">{transmissionLabel}</span>
+          </div>
+        </div>
+
+        {/* Luggage / Fuel Column */}
+        <div className="flex items-center gap-2">
+          <Briefcase className="h-4 w-4 text-stone-700 shrink-0" />
+          <div className="text-[11px] leading-tight">
+            <span className="text-[10px] text-stone-400 block font-normal">Luggage</span>
+            <span className="font-semibold text-gray-900">{luggageBags}</span>
+          </div>
+        </div>
       </div>
-
-      {/* Model Name */}
-      <h3 className="text-lg md:text-xl font-bold tracking-tight text-foreground group-hover:text-stone-700 dark:group-hover:text-stone-300 transition-colors mb-2">
-        <Link href={`/vehicles/${vehicle.slug}`}>
-          {vehicle.model}
-        </Link>
-      </h3>
-
-      {/* Specs Line */}
-      <p className="text-xs text-stone-500 mb-4 font-normal">
-        {vehicle.fuelType.charAt(0) + vehicle.fuelType.slice(1).toLowerCase()} ·{' '}
-        {transmissionLabel} · {formatMileage(vehicle.mileage)}
-      </p>
-
-      {/* View Vehicle Action Link */}
-      <div className="mt-auto flex items-center justify-between pt-2">
-        <Link
-          href={`/vehicles/${vehicle.slug}`}
-          className="inline-flex items-center gap-1.5 text-[11px] uppercase font-semibold tracking-tracked text-foreground hover:text-stone-600 transition-colors group/link"
-        >
-          <span>VIEW VEHICLE</span>
-          <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5" />
-        </Link>
-
-        {onQuickView && (
-          <button
-            onClick={() => onQuickView(vehicle)}
-            className="text-[10px] uppercase tracking-tracked text-stone-400 hover:text-stone-900 dark:hover:text-white transition-colors cursor-pointer"
-          >
-            Quick Specs
-          </button>
-        )}
-      </div>
-
-      {/* Bottom Hairline Divider matching reference */}
-      <div className="w-full h-px bg-[#E5E2DC] dark:bg-neutral-800 mt-6" />
     </div>
   );
 }

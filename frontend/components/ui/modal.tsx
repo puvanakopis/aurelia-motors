@@ -60,7 +60,7 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         className={cn(
-          'relative w-full bg-white dark:bg-[#121316] text-foreground border border-stone-200 dark:border-neutral-800 shadow-2xl z-10 max-h-[90vh] overflow-y-auto',
+          'relative w-full bg-white dark:bg-[#121316] text-foreground border border-stone-200 dark:border-neutral-800 shadow-2xl z-10 max-h-[90vh] overflow-y-auto rounded-2xl sm:rounded-3xl',
           maxWidths[maxWidth]
         )}
       >
@@ -80,7 +80,7 @@ export function Modal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-stone-400 hover:text-stone-900 dark:hover:text-white transition-colors cursor-pointer"
+            className="p-2 rounded-full text-stone-400 hover:text-stone-900 hover:bg-stone-100 dark:hover:bg-neutral-800 dark:hover:text-white transition-colors cursor-pointer"
             aria-label="Close modal"
           >
             <X className="h-5 w-5" />

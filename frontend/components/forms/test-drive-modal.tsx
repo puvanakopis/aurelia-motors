@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Vehicle, Branch } from '@aurelia/types';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { bookTestDrive } from '@/lib/api';
 
 interface TestDriveModalProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ export function TestDriveModal({
   const [preferredTime, setPreferredTime] = React.useState('11:00 AM');
   const [isSubmitted, setIsSubmitted] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (selectedVehicleId) {
@@ -39,15 +41,36 @@ export function TestDriveModal({
     }
   }, [selectedVehicleId]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  React.useEffect(() => {
+    if (vehicles.length > 0 && !vehicleId) {
+      setVehicleId(vehicles[0].id);
+    }
+    if (branches.length > 0 && !branchId) {
+      setBranchId(branches[0].id);
+    }
+  }, [vehicles, branches, vehicleId, branchId]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setIsLoading(true);
 
-    // Simulate real booking flow
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await bookTestDrive({
+        vehicleId: vehicleId || vehicles[0]?.id,
+        branchId: branchId || branches[0]?.id,
+        name,
+        email,
+        phone,
+        preferredDate: preferredDate || new Date().toISOString().split('T')[0],
+        preferredTime,
+      });
       setIsSubmitted(true);
-    }, 800);
+    } catch (err: any) {
+      setError(err.message || 'Failed to submit appointment. Please check your inputs.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleResetAndClose = () => {
@@ -84,13 +107,19 @@ export function TestDriveModal({
             Our Private Client Concierge will contact you at {phone || email} to confirm any bespoke requirements.
           </p>
           <div className="pt-4">
-            <Button variant="primary" onClick={handleResetAndClose} className="w-full">
+            <Button variant="primary" onClick={handleResetAndClose} className="w-full rounded-full">
               RETURN TO SHOWROOM
             </Button>
           </div>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
           <Select
             label="Selected Vehicle"
             value={vehicleId}
@@ -171,7 +200,7 @@ export function TestDriveModal({
               type="submit"
               variant="champagne"
               isLoading={isLoading}
-              className="w-full h-12 text-xs font-semibold tracking-tracked"
+              className="w-full h-12 text-xs font-semibold tracking-tracked rounded-full"
             >
               CONFIRM APPOINTMENT
             </Button>
