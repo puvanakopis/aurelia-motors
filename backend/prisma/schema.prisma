@@ -1,0 +1,353 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  CUSTOMER
+  SALES_STAFF
+  MANAGER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum FuelType {
+  PETROL
+  DIESEL
+  HYBRID
+  ELECTRIC
+}
+
+enum Transmission {
+  AUTOMATIC
+  MANUAL
+  CVT
+  DCT
+}
+
+enum StockStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
+  IN_TRANSIT
+}
+
+enum EnquiryStatus {
+  NEW
+  CONTACTED
+  FOLLOW_UP
+  QUALIFIED
+  CONVERTED
+  CLOSED
+}
+
+enum TestDriveStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum QuotationStatus {
+  DRAFT
+  SENT
+  VIEWED
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+enum FinancingPreference {
+  CASH
+  LEASE
+  FINANCE
+}
+
+model User {
+  id                 String              @id @default(uuid())
+  email              String              @unique
+  password           String
+  firstName          String
+  lastName           String
+  phone              String?
+  role               UserRole            @default(CUSTOMER)
+  avatarUrl          String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  enquiries          Enquiry[]           @relation("UserEnquiries")
+  assignedEnquiries  Enquiry[]           @relation("StaffEnquiries")
+  testDrives         TestDriveRequest[]  @relation("UserTestDrives")
+  assignedTestDrives TestDriveRequest[]  @relation("StaffTestDrives")
+  quotations         QuotationRequest[]  @relation("UserQuotations")
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+model Brand {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  logoUrl     String?
+  country     String?
+  description String?   @db.Text
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  vehicles    Vehicle[]
+
+  @@index([slug])
+  @@map("brands")
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?   @db.Text
+  imageUrl    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  vehicles    Vehicle[]
+
+  @@index([slug])
+  @@map("categories")
+}
+
+model Vehicle {
+  id             String                 @id @default(uuid())
+  brandId        String
+  categoryId     String
+  name           String
+  model          String
+  variant        String?
+  year           Int
+  price          Float
+  discountPrice  Float?
+  description    String                 @db.Text
+  fuelType       FuelType
+  transmission   Transmission
+  engine         String?
+  engineCapacity String?
+  horsepower     Int?
+  torque         Int?
+  mileage        Int                    @default(0)
+  color          String
+  doors          Int                    @default(4)
+  seats          Int                    @default(5)
+  stockStatus    StockStatus            @default(AVAILABLE)
+  featured       Boolean                @default(false)
+  slug           String                 @unique
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  brand          Brand                  @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  category       Category               @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  images         VehicleImage[]
+  specifications VehicleSpecification[]
+  inventory      InventoryItem[]
+  enquiries      Enquiry[]
+  testDrives     TestDriveRequest[]
+  quotations     QuotationRequest[]
+
+  @@index([brandId])
+  @@index([categoryId])
+  @@index([slug])
+  @@index([fuelType])
+  @@index([transmission])
+  @@index([stockStatus])
+  @@index([featured])
+  @@index([price])
+  @@index([year])
+  @@map("vehicles")
+}
+
+model VehicleImage {
+  id        String   @id @default(uuid())
+  vehicleId String
+  url       String
+  altText   String?
+  isPrimary Boolean  @default(false)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@index([vehicleId])
+  @@index([isPrimary])
+  @@map("vehicle_images")
+}
+
+model VehicleSpecification {
+  id        String   @id @default(uuid())
+  vehicleId String
+  category  String
+  name      String
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@index([vehicleId])
+  @@index([category])
+  @@map("vehicle_specifications")
+}
+
+model Branch {
+  id           String             @id @default(uuid())
+  name         String
+  address      String
+  city         String
+  phone        String
+  email        String
+  openingHours String
+  latitude     Float?
+  longitude    Float?
+  active       Boolean            @default(true)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  inventory    InventoryItem[]
+  testDrives   TestDriveRequest[]
+
+  @@index([city])
+  @@index([active])
+  @@map("branches")
+}
+
+model InventoryItem {
+  id        String      @id @default(uuid())
+  vehicleId String
+  branchId  String
+  quantity  Int         @default(1)
+  reserved  Int         @default(0)
+  available Int         @default(1)
+  status    StockStatus @default(AVAILABLE)
+  vin       String?     @unique
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  vehicle   Vehicle     @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  branch    Branch      @relation(fields: [branchId], references: [id], onDelete: Restrict)
+
+  @@index([vehicleId])
+  @@index([branchId])
+  @@index([status])
+  @@map("inventory_items")
+}
+
+model Enquiry {
+  id              String        @id @default(uuid())
+  vehicleId       String?
+  userId          String?
+  name            String
+  email           String
+  phone           String
+  message         String        @db.Text
+  status          EnquiryStatus @default(NEW)
+  assignedStaffId String?
+  notes           String?       @db.Text
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  vehicle         Vehicle?      @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  user            User?         @relation("UserEnquiries", fields: [userId], references: [id], onDelete: SetNull)
+  assignedStaff   User?         @relation("StaffEnquiries", fields: [assignedStaffId], references: [id], onDelete: SetNull)
+
+  @@index([vehicleId])
+  @@index([userId])
+  @@index([assignedStaffId])
+  @@index([status])
+  @@map("enquiries")
+}
+
+model TestDriveRequest {
+  id              String          @id @default(uuid())
+  vehicleId       String
+  branchId        String
+  userId          String?
+  name            String
+  email           String
+  phone           String
+  preferredDate   String
+  preferredTime   String
+  status          TestDriveStatus @default(PENDING)
+  assignedStaffId String?
+  notes           String?         @db.Text
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  vehicle         Vehicle         @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  branch          Branch          @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  user            User?           @relation("UserTestDrives", fields: [userId], references: [id], onDelete: SetNull)
+  assignedStaff   User?           @relation("StaffTestDrives", fields: [assignedStaffId], references: [id], onDelete: SetNull)
+
+  @@index([vehicleId])
+  @@index([branchId])
+  @@index([userId])
+  @@index([assignedStaffId])
+  @@index([status])
+  @@map("test_drive_requests")
+}
+
+model QuotationRequest {
+  id                  String               @id @default(uuid())
+  vehicleId           String
+  userId              String?
+  name                String
+  email               String
+  phone               String
+  financingPreference FinancingPreference? @default(FINANCE)
+  tradeInDetails      String?              @db.Text
+  downPayment         Float?
+  termMonths          Int?
+  status              QuotationStatus      @default(DRAFT)
+  finalPrice          Float?
+  discount            Float?
+  fees                Float?
+  validUntil          DateTime?
+  notes               String?              @db.Text
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  vehicle             Vehicle              @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  user                User?                @relation("UserQuotations", fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([vehicleId])
+  @@index([userId])
+  @@index([status])
+  @@map("quotation_requests")
+}
+
+model Offer {
+  id            String       @id @default(uuid())
+  title         String
+  slug          String       @unique
+  description   String       @db.Text
+  discountType  DiscountType @default(PERCENTAGE)
+  discountValue Float
+  startDate     DateTime
+  endDate       DateTime
+  active        Boolean      @default(true)
+  bannerUrl     String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([slug])
+  @@index([active])
+  @@map("offers")
+}
