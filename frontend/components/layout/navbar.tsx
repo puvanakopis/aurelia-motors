@@ -3,24 +3,22 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search, Menu, X, PhoneCall } from 'lucide-react';
+import { Menu, X, ChevronDown, Compass } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
 interface NavbarProps {
   onOpenTestDrive?: () => void;
-  favoritesCount?: number;
 }
 
-export function Navbar({ onOpenTestDrive, favoritesCount = 0 }: NavbarProps) {
+export function Navbar({ onOpenTestDrive }: NavbarProps) {
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const pathname = usePathname();
-  const isHomepage = pathname === '/';
 
   React.useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 40) {
+      if (window.scrollY > 20) {
         setIsScrolled(true);
       } else {
         setIsScrolled(false);
@@ -31,89 +29,58 @@ export function Navbar({ onOpenTestDrive, favoritesCount = 0 }: NavbarProps) {
   }, []);
 
   const navLinks = [
-    { name: 'VEHICLES', href: '/vehicles' },
-    { name: 'COMPARE', href: '/compare' },
-    { name: 'TEST DRIVE', href: '#test-drive', isAction: true },
-    { name: 'BRANDS', href: '/brands' },
-    { name: 'OFFERS', href: '/offers' },
-    { name: 'ABOUT', href: '/about' },
+    { name: 'Home', href: '/' },
+    { name: 'Cars', href: '/vehicles' },
+    { name: 'Offers', href: '/offers' },
+    { name: 'About', href: '/about' },
+    { name: 'Contact', href: '/contact' },
   ];
-
-  const headerBgClass = isHomepage
-    ? isScrolled
-      ? 'bg-[#0D0E10]/95 backdrop-blur-md border-b border-white/10 text-white shadow-xl'
-      : 'bg-gradient-to-b from-black/80 via-black/40 to-transparent text-white'
-    : 'bg-[#0D0E10] text-white border-b border-white/10';
 
   return (
     <>
       <header
         className={cn(
-          'fixed top-0 left-0 right-0 z-40 transition-all duration-300',
-          headerBgClass
+          'fixed top-0 left-0 right-0 z-40 transition-all duration-200 bg-white/95 backdrop-blur-md',
+          isScrolled ? 'shadow-sm py-3' : 'py-5'
         )}
       >
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 h-20 flex items-center justify-between">
-          {/* Brand Logo */}
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between">
+          {/* Brand Logo with Yellow Pin Icon */}
           <Link
             href="/"
-            className="text-sm md:text-base font-bold tracking-tracked-wide text-white transition-opacity hover:opacity-80 uppercase"
+            className="flex items-center gap-2.5 text-xl font-bold text-gray-900 tracking-tight"
           >
-            AURELIA MOTORS
+            <div className="w-8 h-8 rounded-full bg-[#FEE123] flex items-center justify-center text-black shadow-sm">
+              <Compass className="w-4 h-4 fill-black stroke-black" />
+            </div>
+            <span className="font-extrabold text-gray-900 tracking-tight">Aurelia</span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            {navLinks.map((link) => {
-              if (link.isAction) {
+          {/* Desktop Capsule Pill Navigation */}
+          <nav className="hidden md:flex items-center bg-[#141517] text-white rounded-full px-6 py-2.5 shadow-md">
+            <div className="flex items-center space-x-6 text-xs font-medium">
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href || (link.href === '/vehicles' && pathname.startsWith('/vehicles'));
                 return (
-                  <button
+                  <Link
                     key={link.name}
-                    onClick={() => {
-                      if (onOpenTestDrive) onOpenTestDrive();
-                      else {
-                        const el = document.getElementById('test-drive');
-                        if (el) el.scrollIntoView({ behavior: 'smooth' });
-                      }
-                    }}
-                    className="text-xs uppercase font-medium tracking-tracked text-neutral-300 hover:text-white transition-colors cursor-pointer"
+                    href={link.href}
+                    className={cn(
+                      'transition-colors hover:text-[#FEE123]',
+                      isActive ? 'text-[#FEE123] font-semibold' : 'text-stone-300'
+                    )}
                   >
                     {link.name}
-                  </button>
+                  </Link>
                 );
-              }
-              const isActive = pathname === link.href;
-              return (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className={cn(
-                    'text-xs uppercase font-medium tracking-tracked transition-colors',
-                    isActive
-                      ? 'text-white font-semibold'
-                      : 'text-neutral-300 hover:text-white'
-                  )}
-                >
-                  {link.name}
-                </Link>
-              );
-            })}
+              })}
+            </div>
           </nav>
 
-          {/* Right Action Stack */}
-          <div className="flex items-center space-x-4 md:space-x-6">
-            {/* Search link */}
-            <Link
-              href="/vehicles"
-              aria-label="Search showroom"
-              className="p-2 text-neutral-300 hover:text-white transition-colors"
-            >
-              <Search className="h-4 w-4" />
-            </Link>
-
-            {/* Book Test Drive Button (matches reference image header) */}
+          {/* Right Action: CTA Button */}
+          <div className="hidden lg:flex items-center gap-3">
             <Button
-              variant="dark"
+              variant="champagne"
               size="sm"
               onClick={() => {
                 if (onOpenTestDrive) onOpenTestDrive();
@@ -122,30 +89,33 @@ export function Navbar({ onOpenTestDrive, favoritesCount = 0 }: NavbarProps) {
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }
               }}
-              className="hidden lg:inline-flex bg-black/80 hover:bg-neutral-900 border border-neutral-700 text-white font-semibold text-[11px] tracking-tracked"
+              className="text-xs font-semibold px-5 py-2.5"
             >
-              BOOK A TEST DRIVE
+              Book Drive
             </Button>
-
-            {/* Mobile menu toggle */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-white md:hidden"
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
           </div>
+
+          {/* Mobile menu toggle */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 text-gray-900 md:hidden cursor-pointer"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
         </div>
       </header>
 
       {/* Mobile Drawer Navigation */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-black/95 text-white flex flex-col p-8 md:hidden">
-          <div className="flex justify-between items-center pb-6 hairline-b">
-            <span className="text-sm font-bold tracking-tracked-wide uppercase">
-              AURELIA MOTORS
-            </span>
+        <div className="fixed inset-0 z-50 bg-[#121316] text-white flex flex-col p-8 md:hidden">
+          <div className="flex justify-between items-center pb-6 border-b border-white/10">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-[#FEE123] flex items-center justify-center text-black">
+                <Compass className="w-4 h-4 fill-black stroke-black" />
+              </div>
+              <span className="font-bold text-lg">Aurelia</span>
+            </div>
             <button
               onClick={() => setMobileMenuOpen(false)}
               className="p-2 text-neutral-400 hover:text-white"
@@ -160,31 +130,34 @@ export function Navbar({ onOpenTestDrive, favoritesCount = 0 }: NavbarProps) {
                 key={link.name}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-lg font-medium tracking-tracked text-neutral-200 hover:text-white uppercase"
+                className={cn(
+                  'text-lg font-medium transition-colors',
+                  pathname === link.href ? 'text-[#FEE123] font-bold' : 'text-neutral-200'
+                )}
               >
                 {link.name}
               </Link>
             ))}
             <Link
-              href="/account"
+              href="/compare"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-lg font-medium tracking-tracked text-neutral-200 hover:text-white uppercase"
+              className="text-lg font-medium text-neutral-200 hover:text-white"
             >
-              MY ACCOUNT
+              Compare Cars
             </Link>
             <Link
               href="/admin"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-xs uppercase font-medium tracking-widest text-champagne pt-4"
+              className="text-xs uppercase font-medium tracking-widest text-[#FEE123] pt-4"
             >
               → Admin Portal
             </Link>
           </div>
 
-          <div className="mt-auto pt-6 hairline-t space-y-3">
+          <div className="mt-auto pt-6 border-t border-white/10 space-y-3">
             <Button
               variant="champagne"
-              className="w-full"
+              className="w-full text-xs font-bold"
               onClick={() => {
                 setMobileMenuOpen(false);
                 if (onOpenTestDrive) onOpenTestDrive();
@@ -192,12 +165,6 @@ export function Navbar({ onOpenTestDrive, favoritesCount = 0 }: NavbarProps) {
             >
               BOOK A TEST DRIVE
             </Button>
-            <a
-              href="tel:+94112589000"
-              className="flex items-center justify-center gap-2 text-xs uppercase tracking-tracked text-neutral-400 py-2"
-            >
-              <PhoneCall className="h-3.5 w-3.5" /> Call Showroom Concierge
-            </a>
           </div>
         </div>
       )}

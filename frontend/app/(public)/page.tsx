@@ -12,31 +12,48 @@ import { BranchesSection } from '@/components/homepage/branches-section';
 import { TestDriveModal } from '@/components/forms/test-drive-modal';
 import { EnquiryModal } from '@/components/forms/enquiry-modal';
 import { VehicleQuickViewModal } from '@/components/vehicle/vehicle-quick-view-modal';
-import {
-  SAMPLE_VEHICLES,
-  SAMPLE_CATEGORIES,
-  SAMPLE_BRANCHES,
-} from '@/lib/constants';
-import { Vehicle } from '@aurelia/types';
+import { getVehicles, getCategories, getBranches } from '@/lib/api';
+import { Vehicle, Category, Branch } from '@aurelia/types';
 
 export default function HomePage() {
-  const [favorites, setFavorites] = React.useState<string[]>(['veh-2']);
+  const [vehicles, setVehicles] = React.useState<Vehicle[]>([]);
+  const [categories, setCategories] = React.useState<Category[]>([]);
+  const [branches, setBranches] = React.useState<Branch[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
   const [isTestDriveOpen, setIsTestDriveOpen] = React.useState(false);
   const [isConciergeOpen, setIsConciergeOpen] = React.useState(false);
-  const [selectedVehicleForDrive, setSelectedVehicleForDrive] = React.useState<string>('veh-1');
+  const [selectedVehicleForDrive, setSelectedVehicleForDrive] = React.useState<string>('');
   const [quickViewVehicle, setQuickViewVehicle] = React.useState<Vehicle | null>(null);
 
-  const toggleFavorite = (vehicleId: string) => {
-    setFavorites((prev) =>
-      prev.includes(vehicleId)
-        ? prev.filter((id) => id !== vehicleId)
-        : [...prev, vehicleId]
-    );
-  };
+  React.useEffect(() => {
+    setIsLoading(true);
+    Promise.all([
+      getVehicles({ limit: 6 }),
+      getCategories(),
+      getBranches(),
+    ])
+      .then(([vehRes, catRes, branchRes]) => {
+        const list = Array.isArray(vehRes) ? vehRes : (vehRes?.data || []);
+        setVehicles(list);
+        setCategories(catRes || []);
+        setBranches(branchRes || []);
+        if (list.length > 0) {
+          setSelectedVehicleForDrive(list[0].id);
+        }
+      })
+      .catch((err) => {
+        console.error('Database connection error:', err);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
 
   const handleOpenTestDrive = (vehicleId?: string) => {
     if (vehicleId) {
       setSelectedVehicleForDrive(vehicleId);
+    } else if (vehicles.length > 0) {
+      setSelectedVehicleForDrive(vehicles[0].id);
     }
     setIsTestDriveOpen(true);
   };
@@ -44,48 +61,43 @@ export default function HomePage() {
   return (
     <div className="flex min-h-screen flex-col bg-[#FAF9F6]">
       {/* Navigation */}
-      <Navbar
-        onOpenTestDrive={() => handleOpenTestDrive()}
-        favoritesCount={favorites.length}
-      />
+      <Navbar onOpenTestDrive={() => handleOpenTestDrive()} />
 
       <main className="flex-1">
-        {/* 1. Hero Section (Reference Image 4) */}
-        <Hero onBookTestDrive={() => handleOpenTestDrive('veh-1')} />
+        {/* 1. Hero Section */}
+        <Hero onBookTestDrive={() => handleOpenTestDrive(vehicles[0]?.id)} />
 
-        {/* 2. Featured Vehicles Grid (Reference Image 3) */}
+        {/* 2. Featured Vehicles Grid (Fetched directly from DB) */}
         <FeaturedVehicles
-          vehicles={SAMPLE_VEHICLES.slice(0, 3)}
-          favorites={favorites}
-          onToggleFavorite={toggleFavorite}
+          vehicles={vehicles.slice(0, 3)}
           onQuickView={(v) => setQuickViewVehicle(v)}
         />
 
-        {/* 3. Browse By Category 2x2 Grid (Reference Image 2) */}
-        <CategoriesSection categories={SAMPLE_CATEGORIES} />
+        {/* 3. Browse By Category (Fetched directly from DB) */}
+        <CategoriesSection categories={categories} />
 
-        {/* 4. Our Standard (Reference Image 1 - Top Half) */}
+        {/* 4. Our Standard */}
         <StandardsSection />
 
-        {/* 5. Experience Appointment CTA Banner (Reference Image 1 - Middle Dark Banner) */}
+        {/* 5. Experience Appointment CTA Banner */}
         <AppointmentCTA
           onBookTestDrive={() => handleOpenTestDrive()}
           onOpenConcierge={() => setIsConciergeOpen(true)}
         />
 
-        {/* 6. Showroom Branches Gallery (Colombo, Jaffna, Batticaloa) */}
-        <BranchesSection branches={SAMPLE_BRANCHES} />
+        {/* 6. Showroom Branches Gallery (Fetched directly from DB) */}
+        <BranchesSection branches={branches} />
       </main>
 
-      {/* Footer (Reference Image 1 - Bottom Half) */}
+      {/* Footer */}
       <Footer />
 
       {/* Interactive Modals */}
       <TestDriveModal
         isOpen={isTestDriveOpen}
         onClose={() => setIsTestDriveOpen(false)}
-        vehicles={SAMPLE_VEHICLES}
-        branches={SAMPLE_BRANCHES}
+        vehicles={vehicles}
+        branches={branches}
         selectedVehicleId={selectedVehicleForDrive}
       />
 
@@ -98,7 +110,7 @@ export default function HomePage() {
         isOpen={!!quickViewVehicle}
         onClose={() => setQuickViewVehicle(null)}
         vehicle={quickViewVehicle}
-        onBookTestDrive={(vId) => handleOpenTestDrive(vId)}
+        onBookTestDrive={(id) => handleOpenTestDrive(id)}
       />
     </div>
   );

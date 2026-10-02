@@ -3,7 +3,6 @@
 import * as React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
 import { Category } from '@aurelia/types';
 
 interface CategoriesSectionProps {
@@ -11,56 +10,47 @@ interface CategoriesSectionProps {
 }
 
 export function CategoriesSection({ categories }: CategoriesSectionProps) {
+  const fallbackCategories = [
+    { id: '1', name: 'Sedans', slug: 'sedan', imageUrl: '/images/categories/sedan.jpg' },
+    { id: '2', name: 'SUVs', slug: 'suv', imageUrl: '/images/categories/suv.jpg' },
+    { id: '3', name: 'Sports', slug: 'sports', imageUrl: '/images/categories/sports.jpg' },
+    { id: '4', name: 'Electric', slug: 'electric', imageUrl: '/images/categories/electric.jpg' },
+  ];
+
+  const displayCategories = categories.length > 0 ? categories : fallbackCategories;
+
   return (
-    <section className="bg-[#FAF9F6] py-20 md:py-28 text-foreground border-t border-[#EAE6DF]">
+    <section className="bg-white py-12 sm:py-16 text-foreground">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         {/* Section Header */}
-        <div className="mb-12">
-          <p className="sub-header-label mb-2">02 — BROWSE</p>
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground uppercase">
-            FIND YOUR DRIVE
+        <div className="mb-10">
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+            Our rental categories
           </h2>
         </div>
 
-        {/* 2x2 Grid of Category Tiles */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
-          {categories.map((cat) => (
+        {/* 4 Circular Category Cards Grid matching Image 4 */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+          {displayCategories.slice(0, 4).map((cat) => (
             <Link
               key={cat.id}
               href={`/vehicles?category=${cat.slug}`}
-              className="group relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden bg-stone-900 block"
+              className="group bg-[#F4F4F6] hover:bg-[#EFEFF2] rounded-3xl p-6 flex flex-col items-center justify-center transition-all duration-300 hover:shadow-md"
             >
-              {/* Category Background Image */}
-              {cat.imageUrl && (
+              {/* Circular Avatar / Image */}
+              <div className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-full overflow-hidden shadow-sm mb-4 border-2 border-white">
                 <Image
-                  src={cat.imageUrl}
+                  src={cat.imageUrl || '/images/hero-1.png'}
                   alt={cat.name}
                   fill
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
-              )}
-
-              {/* Dark Gradient Overlay for Readability */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
-
-              {/* Category Info Overlay at Bottom Left */}
-              <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between text-white">
-                <div className="space-y-1">
-                  <h3 className="text-xl md:text-2xl font-bold uppercase tracking-tight text-white">
-                    {cat.name}
-                  </h3>
-                  {cat.description && (
-                    <p className="text-xs text-neutral-300 font-normal">
-                      {cat.description}
-                    </p>
-                  )}
-                </div>
-
-                <div className="h-8 w-8 rounded-full bg-white/10 group-hover:bg-white text-white group-hover:text-black flex items-center justify-center transition-colors">
-                  <ArrowRight className="h-4 w-4" />
-                </div>
               </div>
+
+              <h3 className="text-sm sm:text-base font-bold text-gray-900 group-hover:text-black">
+                {cat.name}
+              </h3>
             </Link>
           ))}
         </div>

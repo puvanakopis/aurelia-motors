@@ -42,7 +42,7 @@ export function AppointmentCTA({
               variant="champagne"
               size="md"
               onClick={onBookTestDrive}
-              className="w-full flex items-center justify-between px-6 py-3.5 text-xs font-semibold tracking-tracked text-[#111215] group"
+              className="w-full flex items-center justify-between px-6 py-3.5 text-xs font-semibold tracking-tracked text-[#111215] rounded-full group cursor-pointer"
             >
               <span>BOOK A TEST DRIVE</span>
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -51,7 +51,7 @@ export function AppointmentCTA({
             {/* Call Button */}
             <a
               href="tel:+94112589000"
-              className="w-full inline-flex items-center justify-center gap-2.5 h-11 px-6 text-xs uppercase font-medium tracking-tracked bg-transparent text-white border border-neutral-700 hover:border-neutral-500 hover:bg-white/5 transition-colors"
+              className="w-full inline-flex items-center justify-center gap-2.5 h-11 px-6 text-xs uppercase font-medium tracking-tracked bg-transparent text-white border border-neutral-700 hover:border-neutral-500 hover:bg-white/5 rounded-full transition-colors"
             >
               <Phone className="h-3.5 w-3.5" />
               <span>CALL OUR SHOWROOM</span>

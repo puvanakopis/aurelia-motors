@@ -2,52 +2,46 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
 import { Vehicle } from '@aurelia/types';
 import { VehicleCard } from '@/components/vehicle/vehicle-card';
-import { Button } from '@/components/ui/button';
 
 interface FeaturedVehiclesProps {
   vehicles: Vehicle[];
-  favorites: string[];
-  onToggleFavorite: (id: string) => void;
   onQuickView?: (vehicle: Vehicle) => void;
 }
 
 export function FeaturedVehicles({
   vehicles,
-  favorites,
-  onToggleFavorite,
   onQuickView,
 }: FeaturedVehiclesProps) {
   return (
-    <section className="bg-[#FAF9F6] py-20 md:py-28 text-foreground">
+    <section className="bg-white py-12 sm:py-16 text-foreground">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
+        {/* Section Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+            Our rental car collection
+          </h2>
+
+          <Link href="/vehicles">
+            <button className="bg-[#FEE123] hover:bg-[#FDD835] text-black font-bold text-xs px-5 py-2.5 rounded-lg inline-flex items-center gap-2.5 transition-transform active:scale-95 shadow-sm cursor-pointer">
+              <span>View all vehicles</span>
+              <span className="w-4 h-4 bg-black text-white rounded-sm flex items-center justify-center text-[10px] font-bold">
+                →
+              </span>
+            </button>
+          </Link>
+        </div>
+
         {/* Vehicles Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {vehicles.map((vehicle) => (
             <VehicleCard
               key={vehicle.id}
               vehicle={vehicle}
-              isFavorite={favorites.includes(vehicle.id)}
-              onToggleFavorite={onToggleFavorite}
               onQuickView={onQuickView}
             />
           ))}
-        </div>
-
-        {/* View All Vehicles Centered CTA */}
-        <div className="mt-16 flex justify-center">
-          <Link href="/vehicles">
-            <Button
-              variant="outline"
-              size="md"
-              className="bg-transparent border-[#D5D1C8] text-[#111215] hover:bg-[#F2EFEB] px-8 py-3 font-semibold text-xs tracking-tracked flex items-center gap-2"
-            >
-              <span>VIEW ALL VEHICLES</span>
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
         </div>
       </div>
     </section>

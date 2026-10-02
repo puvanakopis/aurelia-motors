@@ -35,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
-      <body className="min-h-screen bg-[#FAF9F6] text-[#111215] font-sans antialiased selection:bg-stone-900 selection:text-[#FAF9F6]">
+      <body className="min-h-screen bg-background text-foreground font-sans antialiased selection:bg-stone-900 selection:text-[#FAF9F6]">
         {children}
       </body>
     </html>
