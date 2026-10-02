@@ -5,231 +5,182 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
-import { Button } from '@/components/ui/button';
 import { EnquiryModal } from '@/components/forms/enquiry-modal';
 import { TestDriveModal } from '@/components/forms/test-drive-modal';
-import { StandardsSection } from '@/components/homepage/standards-section';
-import { BranchesSection } from '@/components/homepage/branches-section';
-import { SAMPLE_BRANCHES, SAMPLE_VEHICLES } from '@/lib/constants';
-import {
-  Award,
-  ShieldCheck,
-  Compass,
-  Sparkles,
-  CheckCircle2,
-  Calendar,
-  PhoneCall,
-  ArrowRight,
-  Clock,
-  Layers,
-  MapPin,
-  Building,
-} from 'lucide-react';
+import { getBranches, getVehicles } from '@/lib/api';
+import { Branch, Vehicle } from '@aurelia/types';
 
 export default function AboutPage() {
   const [isConciergeOpen, setIsConciergeOpen] = React.useState(false);
   const [isTestDriveOpen, setIsTestDriveOpen] = React.useState(false);
+  const [branches, setBranches] = React.useState<Branch[]>([]);
+  const [vehicles, setVehicles] = React.useState<Vehicle[]>([]);
 
-  const pillars = [
-    {
-      number: '01',
-      title: 'Forensic Provenance & Curation',
-      desc: 'We do not mass-acquire inventory. Every vehicle admitted to the salon undergoes exhaustive mechanical ultrasound, digital telemetry verification, and title authentication.',
-      icon: ShieldCheck,
-    },
-    {
-      number: '02',
-      title: 'Architectural Sanctuaries',
-      desc: 'Our salons in Colombo, Jaffna, and Batticaloa are conceived not as conventional car dealerships, but as serene, minimalist galleries where vehicles are appreciated as functional works of art.',
-      icon: Building,
-    },
-    {
-      number: '03',
-      title: 'White-Glove Stewardship',
-      desc: 'Ownership begins before handover and endures for years. We provide enclosed climate-controlled delivery, comprehensive 24-month warranties, and dedicated private client advisors.',
-      icon: Compass,
-    },
-    {
-      number: '04',
-      title: 'Bespoke Atelier Sourcing',
-      desc: 'For patrons seeking paint-to-sample allocations or rare collector editions, our international sourcing desk maintains direct pipelines with European manufactures and verified private collections.',
-      icon: Sparkles,
-    },
+  React.useEffect(() => {
+    Promise.all([
+      getBranches().catch(() => []),
+      getVehicles({ limit: 20 }).catch(() => ({ data: [] })),
+    ]).then(([branchRes, vehRes]) => {
+      if (branchRes) setBranches(branchRes);
+      if (vehRes?.data) setVehicles(vehRes.data);
+    });
+  }, []);
+
+  const stats = [
+    { value: '15+', label: 'Years of automotive excellence and curation' },
+    { value: '99%', label: 'Client satisfaction and repeat patron score' },
+    { value: '5,000+', label: 'Trusted by thousands of satisfied clients' },
+    { value: '24/7', label: 'Dedicated client support and roadside assist' },
   ];
 
-  const milestones = [
-    { year: '2020', title: 'Private Atelier Founded', desc: 'Established as an exclusive automotive advisory serving discerning private collectors across South Asia.' },
-    { year: '2022', title: 'Colombo Flagship Unveiled', desc: 'Opened our flagship architectural salon in Kollupitiya, introducing the 160-point certified salon standard.' },
-    { year: '2024', title: 'Regional Expansion', desc: 'Expanded our footprint with dedicated galleries in Jaffna and Batticaloa, establishing nationwide white-glove logistics.' },
-    { year: '2026', title: 'Electrified & Bespoke Horizons', desc: 'Pioneering high-speed charging infrastructure and bespoke individual commissioning for high-performance vehicles.' },
+  const team = [
+    {
+      name: 'Emily Johnson',
+      role: 'Client Service Manager',
+      image: '/images/about/team-1.jpg',
+    },
+    {
+      name: 'Michael Smith',
+      role: 'Fleet Operations Supervisor',
+      image: '/images/about/team-2.jpg',
+    },
+    {
+      name: 'Sarah Davis',
+      role: 'Marketing Director',
+      image: '/images/about/team-3.jpg',
+    },
+    {
+      name: 'David Lee',
+      role: 'Business Development Manager',
+      image: '/images/about/team-4.jpg',
+    },
   ];
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#FAF9F6] text-[#111215]">
+    <div className="flex min-h-screen flex-col bg-white text-gray-900">
       <Navbar onOpenTestDrive={() => setIsTestDriveOpen(true)} />
 
-      <main className="flex-1 pt-24 md:pt-28 pb-24">
-        {/* Editorial Hero Header */}
-        <section className="max-w-7xl mx-auto px-6 lg:px-12 pt-4 pb-16 border-b border-[#E5E2DC]">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-end">
-            <div className="lg:col-span-8 space-y-4">
-              <p className="sub-header-label flex items-center gap-2">
-                <Award className="h-3.5 w-3.5 text-champagne-accent" />
-                HERITAGE & VISION
-              </p>
-              <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold uppercase tracking-tight text-foreground font-display leading-[1.05]">
-                THE ARCHITECTURE OF AUTOMOTIVE DISTINCTION
-              </h1>
-              <p className="text-sm md:text-base text-stone-600 max-w-2xl leading-relaxed antialiased">
-                Aurelia Motors was founded on a singular conviction: that acquiring an exceptional automobile should be as refined, transparent, and exhilarating as the drive itself.
-              </p>
-            </div>
-
-            {/* Key Stats Pill Box */}
-            <div className="lg:col-span-4 bg-white border border-[#E5E2DC] p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4 divide-x divide-[#EAE6DF]">
-                <div className="space-y-1">
-                  <span className="text-2xl font-bold tracking-tight font-display">160+</span>
-                  <p className="text-[10px] uppercase font-semibold tracking-tracked text-stone-400">
-                    Inspection Points
-                  </p>
-                </div>
-                <div className="pl-4 space-y-1">
-                  <span className="text-2xl font-bold tracking-tight font-display">100%</span>
-                  <p className="text-[10px] uppercase font-semibold tracking-tracked text-stone-400">
-                    Clean Titles
-                  </p>
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-[#EAE6DF] grid grid-cols-2 gap-4 divide-x divide-[#EAE6DF]">
-                <div className="space-y-1">
-                  <span className="text-2xl font-bold tracking-tight font-display">3</span>
-                  <p className="text-[10px] uppercase font-semibold tracking-tracked text-stone-400">
-                    Salon Galleries
-                  </p>
-                </div>
-                <div className="pl-4 space-y-1">
-                  <span className="text-2xl font-bold tracking-tight font-display">24 Mo</span>
-                  <p className="text-[10px] uppercase font-semibold tracking-tracked text-stone-400">
-                    Warranty Standard
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+      <main className="flex-1 pt-28 sm:pt-36 pb-24 space-y-20">
+        {/* 1. Header Section matching Image 2 */}
+        <section className="max-w-4xl mx-auto px-6 text-center space-y-6">
+          <h1 className="text-4xl sm:text-6xl font-extrabold text-gray-900 tracking-tight">
+            Who we are
+          </h1>
+          <p className="text-xs sm:text-sm text-stone-600 leading-relaxed max-w-2xl mx-auto">
+            Founded with a passion for exceptional motoring, Aurelia Motors has grown into a premier luxury vehicle salon. Our mission is to provide patrons with authenticated, pristine vehicles and bespoke ownership structuring for every journey.
+          </p>
         </section>
 
-        {/* Cinematic Salon Imagery & Narrative */}
-        <section className="max-w-7xl mx-auto px-6 lg:px-12 py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            {/* Image Canvas */}
-            <div className="lg:col-span-7 relative aspect-[16/10] overflow-hidden bg-stone-900 border border-[#E5E2DC] shadow-md">
-              <Image
-                src="/images/about/salon-interior.jpg"
-                alt="Aurelia Motors Flagship Salon Interior"
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 60vw"
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-              <div className="absolute bottom-6 left-6 text-white">
-                <span className="text-[10px] uppercase font-bold tracking-tracked text-champagne block">
-                  Flagship Salon · Kollupitiya
+        {/* 2. 4-Column Stat Counters matching Image 2 */}
+        <section className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-8 border-y border-[#E5E5E8]">
+            {stats.map((stat, idx) => (
+              <div key={idx} className="space-y-2 border-l-2 border-[#FEE123] pl-4 sm:pl-6">
+                <span className="text-3xl sm:text-5xl font-extrabold text-gray-900 block tracking-tight">
+                  {stat.value}
                 </span>
-                <span className="text-sm font-semibold tracking-tight">Curated Exhibition Space</span>
-              </div>
-            </div>
-
-            {/* Narrative Writeup */}
-            <div className="lg:col-span-5 space-y-6">
-              <span className="text-xs uppercase font-bold tracking-tracked text-stone-400 block">
-                THE AURELIA COMMITMENT
-              </span>
-              <h2 className="text-2xl md:text-3xl font-bold uppercase tracking-tight font-display">
-                CURATING RARITY, PRESERVING INTEGRITY
-              </h2>
-              <p className="text-xs sm:text-sm text-stone-700 leading-relaxed">
-                We operate not as transactional brokers, but as personal custodians and advisers to clients who value engineering authenticity. We believe that true luxury is defined by transparency, restraint, and an unwavering devotion to provenance.
-              </p>
-              <p className="text-xs sm:text-sm text-stone-700 leading-relaxed">
-                Whether commissioning a bespoke Porsche allocation from Germany or securing a verified low-mileage executive saloon, our clients enjoy an uncompromised standard of private advisory and aftercare.
-              </p>
-
-              <div className="pt-2">
-                <Button
-                  variant="champagne"
-                  size="md"
-                  onClick={() => setIsConciergeOpen(true)}
-                  className="text-xs font-semibold tracking-tracked uppercase flex items-center gap-2"
-                >
-                  <Sparkles className="h-4 w-4" />
-                  <span>SCHEDULE PRIVATE CONSULTATION</span>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 4 Core Pillars */}
-        <section className="max-w-7xl mx-auto px-6 lg:px-12 py-16 border-t border-[#E5E2DC]">
-          <div className="mb-12">
-            <p className="sub-header-label mb-2">OUR GUIDING PRINCIPLES</p>
-            <h2 className="text-2xl md:text-4xl font-bold uppercase tracking-tight text-foreground font-display">
-              THE FOUR PILLARS OF OUR PRACTICE
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {pillars.map((pillar, idx) => {
-              const Icon = pillar.icon;
-              return (
-                <div
-                  key={idx}
-                  className="bg-white border border-[#E5E2DC] p-8 flex flex-col justify-between hover:border-black transition-colors space-y-6"
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-6">
-                      <span className="font-mono text-xs font-bold text-stone-400">{pillar.number}</span>
-                      <Icon className="h-5 w-5 text-stone-900" />
-                    </div>
-                    <h3 className="text-base font-bold uppercase tracking-tight text-foreground font-display mb-3">
-                      {pillar.title}
-                    </h3>
-                    <p className="text-xs text-stone-600 leading-relaxed">
-                      {pillar.desc}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Timeline Milestones */}
-        <section className="max-w-7xl mx-auto px-6 lg:px-12 py-16 border-t border-[#E5E2DC]">
-          <div className="mb-12">
-            <p className="sub-header-label mb-2">CHRONOLOGY OF EXCELLENCE</p>
-            <h2 className="text-2xl md:text-4xl font-bold uppercase tracking-tight text-foreground font-display">
-              THE AURELIA TIMELINE
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {milestones.map((m, idx) => (
-              <div key={idx} className="border-l-2 border-black pl-6 py-2 space-y-2">
-                <span className="font-mono text-sm font-bold text-black block tracking-widest">{m.year}</span>
-                <h4 className="text-sm font-bold uppercase tracking-tight text-foreground">{m.title}</h4>
-                <p className="text-xs text-stone-600 leading-relaxed">{m.desc}</p>
+                <p className="text-xs text-stone-500 leading-snug">
+                  {stat.label}
+                </p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Reusable Standards & Branches Section */}
-        <StandardsSection />
-        <BranchesSection branches={SAMPLE_BRANCHES} />
+        {/* 3. Hero Showroom Image matching Image 2 */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="relative w-full h-[360px] sm:h-[480px] lg:h-[540px] rounded-3xl overflow-hidden shadow-xl">
+            <Image
+              src="/images/hero-1.png"
+              alt="Aurelia Motors Flagship Salon"
+              fill
+              className="object-cover"
+            />
+          </div>
+        </section>
+
+        {/* 4. Our Mission & Our Values matching Image 2 */}
+        <section className="max-w-4xl mx-auto px-6 space-y-12">
+          {/* Mission */}
+          <div className="space-y-4">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+              Our mission
+            </h2>
+            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+              Our mission is to provide an exceptional vehicle ownership experience that makes luxury motoring effortless, transparent, and exhilarating. With an authenticated inventory and a commitment to customer satisfaction, we strive to make every journey memorable.
+            </p>
+          </div>
+
+          {/* Values */}
+          <div className="space-y-4">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+              Our values
+            </h2>
+            <div className="space-y-3 text-xs sm:text-sm text-stone-700 leading-relaxed">
+              <p>
+                <strong className="text-gray-900 font-bold">• Customer Focus:</strong> We put our clients at the center of everything we do. We build lasting trust through genuine care and tailored attention to detail.
+              </p>
+              <p>
+                <strong className="text-gray-900 font-bold">• Integrity & Transparency:</strong> We operate with complete honesty and transparent terms across every quotation and inspection report.
+              </p>
+              <p>
+                <strong className="text-gray-900 font-bold">• Reliability:</strong> We maintain our vehicles to the highest certified factory standards to ensure total mechanical peace of mind.
+              </p>
+              <p>
+                <strong className="text-gray-900 font-bold">• Innovation:</strong> We embrace electrified mobility, digital telemetry diagnostics, and seamless online test drive reservations.
+              </p>
+              <p>
+                <strong className="text-gray-900 font-bold">• Sustainability:</strong> We are committed to reducing environmental impact through electrified fleets and carbon-offset handovers.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* 5. 5-Image Mosaic Gallery matching Image 2 */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-sm">
+              <Image src="/images/categories/suv.jpg" alt="Salon experience" fill className="object-cover" />
+            </div>
+            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-sm">
+              <Image src="/images/categories/sedan.jpg" alt="Showroom gallery" fill className="object-cover" />
+            </div>
+            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-sm">
+              <Image src="/images/categories/sports.jpg" alt="Supercar lineup" fill className="object-cover" />
+            </div>
+            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-sm">
+              <Image src="/images/categories/electric.jpg" alt="Client consultation" fill className="object-cover" />
+            </div>
+          </div>
+        </section>
+
+        {/* 6. "Our team" Circular Portraits matching Image 2 */}
+        <section className="max-w-7xl mx-auto px-6 lg:px-12 pt-6">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+              Our team
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {team.map((member, idx) => (
+              <div key={idx} className="flex flex-col items-center text-center space-y-3">
+                <div className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-full overflow-hidden shadow-md border-4 border-[#F4F4F6]">
+                  <Image
+                    src={member.image}
+                    alt={member.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-gray-900">{member.name}</h3>
+                  <p className="text-[11px] text-stone-500">{member.role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       </main>
 
       <Footer />
@@ -238,8 +189,8 @@ export default function AboutPage() {
       <TestDriveModal
         isOpen={isTestDriveOpen}
         onClose={() => setIsTestDriveOpen(false)}
-        vehicles={SAMPLE_VEHICLES}
-        branches={SAMPLE_BRANCHES}
+        vehicles={vehicles}
+        branches={branches}
       />
 
       <EnquiryModal

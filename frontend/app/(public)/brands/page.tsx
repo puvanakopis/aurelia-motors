@@ -8,8 +8,9 @@ import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
 import { EnquiryModal } from '@/components/forms/enquiry-modal';
 import { TestDriveModal } from '@/components/forms/test-drive-modal';
-import { SAMPLE_BRANDS, SAMPLE_VEHICLES, SAMPLE_BRANCHES } from '@/lib/constants';
-import { ArrowRight, ArrowUpRight, Compass, ShieldCheck, Sparkles, Globe, Award, ChevronRight } from 'lucide-react';
+import { getBrands, getVehicles, getBranches } from '@/lib/api';
+import { Brand, Vehicle, Branch } from '@aurelia/types';
+import { ArrowRight, Compass, Sparkles } from 'lucide-react';
 
 const BRAND_IMAGES: Record<string, { image: string; tag: string; description: string; highlights: string[] }> = {
   bmw: {
@@ -51,180 +52,203 @@ const BRAND_IMAGES: Record<string, { image: string; tag: string; description: st
 };
 
 export default function BrandsPage() {
+  const [brands, setBrands] = React.useState<Brand[]>([]);
+  const [vehicles, setVehicles] = React.useState<Vehicle[]>([]);
+  const [branches, setBranches] = React.useState<Branch[]>([]);
   const [selectedCountry, setSelectedCountry] = React.useState<string>('ALL');
   const [isConciergeOpen, setIsConciergeOpen] = React.useState(false);
   const [isTestDriveOpen, setIsTestDriveOpen] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
 
-  const countries = ['ALL', 'Germany', 'United Kingdom', 'United States'];
+  React.useEffect(() => {
+    Promise.all([
+      getBrands().catch(() => []),
+      getVehicles({ limit: 100 }).catch(() => ({ data: [] })),
+      getBranches().catch(() => []),
+    ])
+      .then(([brandRes, vehRes, branchRes]) => {
+        if (brandRes) setBrands(brandRes);
+        if (vehRes?.data) setVehicles(vehRes.data);
+        if (branchRes) setBranches(branchRes);
+      })
+      .catch((err) => {
+        console.error('Failed to load brands:', err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  const countries = ['ALL', ...Array.from(new Set(brands.map((b) => b.country).filter(Boolean) as string[]))];
 
   const filteredBrands =
     selectedCountry === 'ALL'
-      ? SAMPLE_BRANDS
-      : SAMPLE_BRANDS.filter((b) => b.country?.toLowerCase() === selectedCountry.toLowerCase());
+      ? brands
+      : brands.filter((b) => b.country?.toLowerCase() === selectedCountry.toLowerCase());
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#FAF9F6] text-[#111215]">
+    <div className="flex min-h-screen flex-col bg-white text-gray-900">
       <Navbar onOpenTestDrive={() => setIsTestDriveOpen(true)} />
 
-      <main className="flex-1 pt-24 md:pt-28 pb-24">
-        {/* Editorial Page Header */}
-        <section className="max-w-7xl mx-auto px-6 lg:px-12 pt-4 pb-12 border-b border-[#E5E2DC]">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div>
-              <p className="sub-header-label mb-2 flex items-center gap-2">
-                <Award className="h-3.5 w-3.5 text-champagne-accent" />
-                MARQUES & MANUFACTURES
-              </p>
-              <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold uppercase tracking-tight text-foreground font-display">
-                PREMIER BRANDS
-              </h1>
-              <p className="text-xs md:text-sm text-stone-600 mt-3 max-w-2xl leading-relaxed">
-                Explore the prestigious automotive dynasties represented in the Aurelia Motors salon. Each manufacturer is hand-selected for mechanical excellence, historic provenance, and exceptional craftsmanship.
-              </p>
-            </div>
+      <main className="flex-1 pt-28 sm:pt-36 pb-24 space-y-16">
+        {/* Header Section */}
+        <section className="max-w-4xl mx-auto px-6 text-center space-y-4">
+          <h1 className="text-4xl sm:text-6xl font-extrabold text-gray-900 tracking-tight">
+            Marques & Brands
+          </h1>
+          <p className="text-xs sm:text-sm text-stone-600 leading-relaxed max-w-2xl mx-auto">
+            Explore the automotive manufacturers represented in the Aurelia Motors salon. Each manufacturer is hand-selected for engineering excellence, historic provenance, and craftsmanship.
+          </p>
 
-            {/* Filter Pills */}
-            <div className="flex flex-wrap gap-2">
-              {countries.map((country) => (
-                <button
-                  key={country}
-                  onClick={() => setSelectedCountry(country)}
-                  className={`px-4 py-2 text-xs font-semibold uppercase tracking-tracked transition-all cursor-pointer border ${
-                    selectedCountry === country
-                      ? 'bg-black text-white border-black shadow-sm'
-                      : 'bg-white text-stone-600 border-stone-300 hover:border-black hover:text-black'
-                  }`}
-                >
-                  {country === 'ALL' ? 'All Marques' : country}
-                </button>
-              ))}
-            </div>
+          {/* Country/Origin Filter Pills */}
+          <div className="flex flex-wrap justify-center gap-2 pt-4">
+            {countries.map((country) => (
+              <button
+                key={country}
+                onClick={() => setSelectedCountry(country)}
+                className={`px-5 py-2 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+                  selectedCountry === country
+                    ? 'bg-black text-white shadow-sm'
+                    : 'bg-[#FEE123] text-black hover:bg-[#FDD835]'
+                }`}
+              >
+                {country === 'ALL' ? 'All Origins' : country}
+              </button>
+            ))}
           </div>
         </section>
 
-        {/* Brands Grid Showcase */}
-        <section className="max-w-7xl mx-auto px-6 lg:px-12 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredBrands.map((brand) => {
-              const brandData = BRAND_IMAGES[brand.slug] || {
-                image: '/images/brands/bmw.jpg',
-                tag: 'Luxury Automaker',
-                description: 'Exceptional engineering and prestige automotive heritage.',
-                highlights: ['Certified Provenance', 'Comprehensive Warranty', 'Salon Verified'],
-              };
+        {/* Brands Grid */}
+        <section className="max-w-7xl mx-auto px-6 lg:px-12">
+          {loading ? (
+            <div className="py-20 flex flex-col items-center justify-center space-y-4">
+              <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
+              <p className="text-xs font-semibold text-stone-500">Loading Automotive Marques...</p>
+            </div>
+          ) : filteredBrands.length === 0 ? (
+            <div className="bg-[#F4F4F6] rounded-3xl p-12 text-center text-stone-500 max-w-lg mx-auto">
+              <p className="font-bold text-base text-gray-900 mb-1">No brands registered</p>
+              <p className="text-xs text-stone-500">Add marques in the Admin Portal to showcase them here.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {filteredBrands.map((brand) => {
+                const brandMeta = BRAND_IMAGES[brand.slug] || {
+                  image: brand.logoUrl || '/images/hero-1.png',
+                  tag: 'Prestige Automotive',
+                  description: brand.description || 'Pinnacle automotive engineering and handcrafted luxury specification.',
+                  highlights: ['Authentic Provenance', 'Factory-Certified Allocation', 'Bespoke Order Available'],
+                };
+                const brandVehicles = vehicles.filter((v) => v.brandId === brand.id || v.brand?.slug === brand.slug);
 
-              return (
-                <div
-                  key={brand.id}
-                  className="group bg-white border border-[#E5E2DC] flex flex-col justify-between overflow-hidden hover:border-black transition-all duration-300 hover:shadow-lg"
-                >
-                  {/* Atmospheric Brand Backdrop Image */}
-                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-stone-900">
-                    <Image
-                      src={brandData.image}
-                      alt={`${brand.name} Collection`}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                return (
+                  <div
+                    key={brand.id}
+                    className="bg-[#F4F4F6] rounded-3xl overflow-hidden flex flex-col justify-between hover:shadow-lg transition-all duration-300"
+                  >
+                    {/* Visual Card Top */}
+                    <div className="relative aspect-[16/9] w-full overflow-hidden bg-stone-900">
+                      <Image
+                        src={brandMeta.image}
+                        alt={brand.name}
+                        fill
+                        sizes="(max-width: 1024px) 100vw, 50vw"
+                        className="object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
 
-                    {/* Country & Tag Badges */}
-                    <div className="absolute top-4 left-4 flex gap-2">
-                      <span className="bg-black/80 backdrop-blur-sm text-champagne text-[10px] uppercase font-bold tracking-tracked px-2.5 py-1 border border-white/10">
-                        {brand.country}
-                      </span>
-                    </div>
+                      <div className="absolute top-4 left-4">
+                        <span className="text-[10px] font-bold text-black bg-[#FEE123] px-3 py-1 rounded-md shadow-sm">
+                          {brand.country || 'Global'}
+                        </span>
+                      </div>
 
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <span className="text-[10px] uppercase font-bold tracking-tracked text-stone-300 block mb-0.5">
-                        {brandData.tag}
-                      </span>
-                      <h3 className="text-2xl font-bold uppercase tracking-tight text-white font-display">
-                        {brand.name}
-                      </h3>
-                    </div>
-                  </div>
-
-                  {/* Body Content */}
-                  <div className="p-6 flex-1 flex flex-col justify-between space-y-5">
-                    <p className="text-xs text-stone-600 leading-relaxed">
-                      {brandData.description}
-                    </p>
-
-                    {/* Highlights List */}
-                    <div className="space-y-2 pt-2 border-t border-[#EAE6DF]">
-                      <span className="text-[10px] uppercase font-bold tracking-tracked text-stone-400 block">
-                        Signature Capabilities
-                      </span>
-                      <div className="space-y-1">
-                        {brandData.highlights.map((highlight, hIdx) => (
-                          <div key={hIdx} className="flex items-center gap-2 text-[11px] text-stone-700">
-                            <span className="h-1 w-1 rounded-full bg-black" />
-                            <span>{highlight}</span>
-                          </div>
-                        ))}
+                      <div className="absolute bottom-4 left-6 right-6 flex items-end justify-between">
+                        <div>
+                          <span className="text-[10px] font-bold text-stone-300 block mb-1">
+                            {brandMeta.tag}
+                          </span>
+                          <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                            {brand.name}
+                          </h3>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-xs font-semibold text-stone-300 block">
+                            {brandVehicles.length} {brandVehicles.length === 1 ? 'Car' : 'Cars'}
+                          </span>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Action Footer */}
-                    <div className="pt-4 border-t border-[#EAE6DF] flex items-center justify-between">
-                      <span className="text-[11px] font-semibold text-stone-500">
-                        {brand.vehicleCount} Models Available
-                      </span>
+                    {/* Brand Body Details */}
+                    <div className="p-8 flex-1 flex flex-col justify-between space-y-6">
+                      <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+                        {brandMeta.description}
+                      </p>
 
-                      <Link
-                        href={`/vehicles?brand=${brand.slug}`}
-                        className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-tracked text-black group-hover:text-stone-600 transition-colors"
-                      >
-                        <span>EXPLORE INVENTORY</span>
-                        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-                      </Link>
+                      {/* Technical Highlights */}
+                      <div className="space-y-2 pt-2 border-t border-[#E5E5E8]">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
+                          Key Signatures
+                        </span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {brandMeta.highlights.map((highlight, idx) => (
+                            <div key={idx} className="flex items-center gap-2 text-xs text-stone-800">
+                              <span className="w-1.5 h-1.5 bg-[#FEE123] rounded-full shrink-0" />
+                              <span>{highlight}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* CTAs */}
+                      <div className="pt-4 border-t border-[#E5E5E8] flex flex-col sm:flex-row gap-3">
+                        <Link href={`/vehicles?brand=${brand.slug}`} className="flex-1">
+                          <button className="w-full bg-[#121316] hover:bg-black text-white font-bold text-xs px-5 py-3 rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer">
+                            <span>Explore {brand.name} Fleet</span>
+                            <ArrowRight className="h-3.5 w-3.5" />
+                          </button>
+                        </Link>
+
+                        <button
+                          onClick={() => setIsConciergeOpen(true)}
+                          className="border border-stone-300 hover:border-black text-gray-900 font-semibold text-xs px-5 py-3 rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                        >
+                          <Compass className="h-3.5 w-3.5" />
+                          <span>Bespoke Sourcing</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </section>
 
-        {/* Bespoke Marque Sourcing Concierge Banner */}
-        <section className="max-w-7xl mx-auto px-6 lg:px-12 mt-10">
-          <div className="bg-[#0D0E10] text-white p-8 md:p-14 border border-white/10 relative overflow-hidden">
-            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              <div className="lg:col-span-8 space-y-4">
-                <span className="text-xs uppercase font-bold tracking-tracked-wide text-champagne block">
-                  BESPOKE VEHICLE SOURCING
-                </span>
-                <h2 className="text-2xl md:text-4xl font-bold uppercase tracking-tight font-display">
-                  CANNOT FIND YOUR PREFERRED SPECIFICATION?
-                </h2>
-                <p className="text-xs md:text-sm text-stone-400 max-w-2xl leading-relaxed">
-                  Our private client advisory desk maintains direct relationships with authorized European manufactures, bespoke ateliers, and verified collectors worldwide. We procure factory allocations, rare build slots, and paint-to-sample editions with authenticated international provenance.
-                </p>
-              </div>
+        {/* Global Commission Banner */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="bg-[#121316] text-white rounded-3xl p-8 sm:p-12 lg:p-16 flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl">
+            <div className="space-y-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#FEE123] block">
+                Factory Allocations & Bespoke Commissions
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                Seeking a rare marque or custom specification?
+              </h2>
+              <p className="text-xs sm:text-sm text-stone-400 max-w-xl leading-relaxed">
+                Our global acquisition team holds direct relationships with European design ateliers to source rare build slots, custom paints, and limited production editions.
+              </p>
+            </div>
 
-              <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-3 justify-end">
-                <Button
-                  variant="champagne"
-                  size="md"
-                  onClick={() => setIsConciergeOpen(true)}
-                  className="w-full text-xs font-semibold tracking-tracked uppercase flex items-center justify-center gap-2"
-                >
-                  <Sparkles className="h-4 w-4" />
-                  <span>COMMISSION BESPOKE SOURCING</span>
-                </Button>
-
-                <Link href="/contact" className="w-full">
-                  <Button
-                    variant="dark"
-                    size="md"
-                    className="w-full border-white/20 text-white hover:border-white text-xs font-semibold tracking-tracked uppercase"
-                  >
-                    VISIT OUR SALONS
-                  </Button>
-                </Link>
-              </div>
+            <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+              <button
+                onClick={() => setIsConciergeOpen(true)}
+                className="bg-[#FEE123] hover:bg-[#FDD835] text-black font-bold text-xs px-6 py-3.5 rounded-lg inline-flex items-center gap-2 transition-colors cursor-pointer shadow-sm"
+              >
+                <Sparkles className="h-4 w-4" />
+                <span>Inquire with Specialist</span>
+              </button>
             </div>
           </div>
         </section>
@@ -236,8 +260,8 @@ export default function BrandsPage() {
       <TestDriveModal
         isOpen={isTestDriveOpen}
         onClose={() => setIsTestDriveOpen(false)}
-        vehicles={SAMPLE_VEHICLES}
-        branches={SAMPLE_BRANCHES}
+        vehicles={vehicles}
+        branches={branches}
       />
 
       <EnquiryModal
