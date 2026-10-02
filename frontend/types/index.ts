@@ -55,7 +55,7 @@ export interface VehicleImage {
 export interface VehicleSpecification {
   id: string;
   vehicleId: string;
-  category: string; // e.g., 'Engine & Performance', 'Dimensions', 'Interior & Comfort', 'Safety'
+  category: string; 
   name: string;
   value: string;
 }
@@ -74,10 +74,10 @@ export interface Vehicle {
   fuelType: FuelType;
   transmission: Transmission;
   engine?: string | null;
-  engineCapacity?: string | null; // e.g. "3.0L Twin-Turbo"
-  horsepower?: number | null; // in HP
-  torque?: number | null; // in Nm
-  mileage: number; // in km
+  engineCapacity?: string | null; 
+  horsepower?: number | null; 
+  torque?: number | null; 
+  mileage: number; 
   color: string;
   doors: number;
   seats: number;
@@ -86,8 +86,6 @@ export interface Vehicle {
   slug: string;
   createdAt: string;
   updatedAt: string;
-  
-  // Relations
   brand?: Brand;
   category?: Category;
   images?: VehicleImage[];
@@ -199,13 +197,6 @@ export interface Offer {
   updatedAt: string;
 }
 
-export interface Favorite {
-  id: string;
-  userId: string;
-  vehicleId: string;
-  vehicle?: Vehicle;
-  createdAt: string;
-}
 
 export interface PaginatedResponse<T> {
   data: T[];

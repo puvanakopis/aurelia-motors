@@ -4,51 +4,51 @@
 
 @layer base {
   :root {
-    --background: #F9F8F6;
+    --background: #FFFFFF;
     --foreground: #111215;
     
-    --primary: #111215;
-    --primary-foreground: #F9F8F6;
+    --primary: #121316;
+    --primary-foreground: #FFFFFF;
     
-    --secondary: #EFECE6;
+    --secondary: #F4F4F6;
     --secondary-foreground: #111215;
     
-    --muted: #71717A;
-    --muted-foreground: #52525B;
+    --muted: #6B7280;
+    --muted-foreground: #9CA3AF;
     
-    --accent: #EAE5DD;
+    --accent: #FEE123;
     --accent-foreground: #111215;
     
-    --card: #FFFFFF;
+    --card: #F4F4F6;
     --card-foreground: #111215;
     
-    --border: #E5E2DC;
-    --input: #E5E2DC;
-    --ring: #111215;
+    --border: #E5E5E8;
+    --input: #E5E5E8;
+    --ring: #FEE123;
   }
 
   .dark {
-    --background: #0D0E10;
+    --background: #0E0F12;
     --foreground: #F4F4F5;
     
-    --primary: #F4F4F5;
-    --primary-foreground: #0D0E10;
+    --primary: #FEE123;
+    --primary-foreground: #121316;
     
-    --secondary: #1F2024;
+    --secondary: #191B1F;
     --secondary-foreground: #F4F4F5;
     
     --muted: #71717A;
     --muted-foreground: #A1A1AA;
     
-    --accent: #27272A;
-    --accent-foreground: #FFFFFF;
+    --accent: #FEE123;
+    --accent-foreground: #121316;
     
     --card: #141519;
     --card-foreground: #F4F4F5;
     
-    --border: #27272A;
-    --input: #27272A;
-    --ring: #F4F4F5;
+    --border: #23252B;
+    --input: #23252B;
+    --ring: #FEE123;
   }
 }
 
@@ -62,39 +62,37 @@
   }
   
   body {
-    @apply bg-background text-foreground antialiased font-sans selection:bg-stone-800 selection:text-stone-100;
+    @apply bg-background text-foreground antialiased font-sans selection:bg-yellow-400 selection:text-black;
   }
 }
 
-/* Luxury Architectural Custom Utilities */
-.hairline-b {
-  border-bottom: 1px solid var(--border);
+/* Custom Carent Design System Utilities */
+.carent-pill-nav {
+  @apply bg-[#141517] text-white rounded-full px-6 py-2.5 flex items-center gap-6 text-xs font-medium shadow-md;
 }
 
-.hairline-t {
-  border-top: 1px solid var(--border);
+.carent-card {
+  @apply bg-[#F4F4F6] rounded-2xl sm:rounded-3xl p-6 sm:p-8 transition-all duration-200 hover:shadow-md;
 }
 
-.hairline-r {
-  border-right: 1px solid var(--border);
+.carent-dark-section {
+  @apply bg-[#121316] text-white rounded-3xl p-8 sm:p-12 lg:p-16;
 }
 
-.hairline-l {
-  border-left: 1px solid var(--border);
+.carent-btn-yellow {
+  @apply bg-[#FEE123] hover:bg-[#FDD835] text-black font-semibold rounded-lg px-6 py-3 transition-all flex items-center justify-center gap-2 shadow-sm active:scale-[0.99];
 }
 
-.editorial-title {
-  letter-spacing: -0.03em;
-  line-height: 1.05;
-  font-weight: 600;
+.carent-btn-dark {
+  @apply bg-[#141517] hover:bg-black text-white font-medium rounded-lg px-6 py-3 transition-all flex items-center justify-center gap-2;
 }
 
-.sub-header-label {
-  font-size: 0.75rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  font-weight: 500;
-  color: #78756F;
+.carent-badge-yellow {
+  @apply bg-[#FEE123] text-black font-semibold text-xs px-4 py-1.5 rounded-md inline-flex items-center gap-1.5;
+}
+
+.carent-badge-dark {
+  @apply bg-[#141517] text-white font-medium text-xs px-4 py-1.5 rounded-md inline-flex items-center gap-1.5;
 }
 
 /* Custom subtle scrollbar */
@@ -102,13 +100,16 @@
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: rgba(120, 117, 111, 0.25);
-  border-radius: 3px;
+  background: #D1D1D6;
+  border-radius: 9999px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(120, 117, 111, 0.45);
+  background: #9CA3AF;
 }
